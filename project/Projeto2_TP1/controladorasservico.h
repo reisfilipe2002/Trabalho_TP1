@@ -144,6 +144,13 @@ public:
     std::vector<Viagem> getResultado();
 };
 
+class ComandoListarViagensAll : public ComandoSQL {
+public:
+    // Gera SELECT para todas as viagens de todos os viajantes.
+    ComandoListarViagensAll();
+    std::vector<Viagem> getResultado();
+};
+
 // (3) Destino (como parte de uma viagem)
 class ComandoAdicionarDestino : public ComandoSQL {
 public:
@@ -195,22 +202,22 @@ public:
 // (5) Hospedagem
 class ComandoAdicionarHospedagem : public ComandoSQL {
 public:
-    ComandoAdicionarHospedagem(const Codigo &codigoViagem, const Codigo &codigoDestino, const Hospedagem &hospedagem);
+    ComandoAdicionarHospedagem( const Codigo &codigoDestino, const Hospedagem &hospedagem);
 };
 
 class ComandoExcluirHospedagem : public ComandoSQL {
 public:
-    ComandoExcluirHospedagem(const Codigo &codigoViagem, const Codigo &codigoDestino, const Codigo &codigoHospedagem);
+    ComandoExcluirHospedagem( const Codigo &codigoDestino, const Codigo &codigoHospedagem);
 };
 
 class ComandoEditarHospedagem : public ComandoSQL {
 public:
-    ComandoEditarHospedagem(const Codigo &codigoViagem, const Codigo &codigoDestino, const Hospedagem &hospedagem);
+    ComandoEditarHospedagem( const Codigo &codigoDestino, const Hospedagem &hospedagem);
 };
 
 class ComandoConsultarHospedagem : public ComandoSQL {
 public:
-    ComandoConsultarHospedagem(const Codigo &codigoViagem, const Codigo &codigoDestino, const Codigo &codigoHospedagem);
+    ComandoConsultarHospedagem( const Codigo &codigoDestino, const Codigo &codigoHospedagem);
     bool getResultado(Hospedagem *hospedagem);
 };
 
@@ -265,6 +272,8 @@ public:
     bool editarHospedagem(const Codigo &codigoViagem, const Codigo &codigoDestino, const Hospedagem &hospedagem) override;
 
     double consultarCustoViagem(const Codigo &codigoViagem);
+
+    double dinheiroParaDouble(const Dinheiro &dinheiro);
 
 private:        
     std::vector<Destino> listarDestinos(const Codigo &codigoViagem);

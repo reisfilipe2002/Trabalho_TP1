@@ -90,7 +90,7 @@ std::string ComandoLerSenha::getResultado() {
 //Classe ComandoCadastrarConta.
 
 ComandoCadastrarConta::ComandoCadastrarConta(const Conta &conta) {
-    comandoSQL = "INSERT INTO contas (codigo, nome, email, senha) VALUES (";
+    comandoSQL = "INSERT INTO contas (codigo, senha) VALUES (";
     comandoSQL += "'" + conta.getCodigo() + "', ";
     comandoSQL += "'" + conta.getSenha() + "')";
 }
@@ -201,6 +201,9 @@ std::vector<Viagem> ComandoListarViagens::getResultado() {
     std::vector<Viagem> viagens;
     ElementoResultado resultado;
 
+    if (listaResultado.empty())
+        throw EErroPersistencia("Lista de resultados vazia.");
+
     while (!listaResultado.empty()) {
         Viagem viagem;
 
@@ -218,6 +221,40 @@ std::vector<Viagem> ComandoListarViagens::getResultado() {
     return viagens;
 }
 
+//--------------------------------------------------------------------------------------------
+// Classe ComandoListarViagemAll
+
+ComandoListarViagensAll::ComandoListarViagensAll() {
+    comandoSQL = "SELECT * FROM viagens";
+}
+
+std::vector<Viagem> ComandoListarViagensAll::getResultado() {
+    std::vector<Viagem> viagens;
+    ElementoResultado resultado;
+
+    if (listaResultado.empty())
+        throw EErroPersistencia("Lista de resultados vazia.");
+
+    while (!listaResultado.empty()) {
+        Viagem viagem;
+
+        resultado = listaResultado.back();
+        listaResultado.pop_back();
+        viagem.setCodigo(std::string(resultado.getValorColuna()));
+
+        resultado = listaResultado.back();
+        listaResultado.pop_back();
+        viagem.setNome(std::string(resultado.getValorColuna()));
+
+        resultado = listaResultado.back();
+        listaResultado.pop_back();
+        viagem.setAvaliacao(std::stoi(resultado.getValorColuna()));
+
+        viagens.push_back(viagem);
+    }
+
+    return viagens;
+}
 //--------------------------------------------------------------------------------------------
 // Classe ComandoAdicionarDestino
 
@@ -246,9 +283,8 @@ ComandoExcluirDestino::ComandoExcluirDestino(const Codigo &codigoViagem, const C
 
 ComandoEditarDestino::ComandoEditarDestino(const Codigo &codigoViagem, const Destino &destino) {
     comandoSQL = "UPDATE destinos ";
-    comandoSQL += "SET nome = '" + destino.getNome().getValor() + "', ";
-    comandoSQL += "custo = '" + std::to_string(destino.getCusto()) + "' ";
-    comandoSQL += "WHERE codigo = '" + destino.getCodigo().getValor() + "' ";
+    comandoSQL += "SET nome = '" + destino.getNome() + "', ";
+    comandoSQL += "WHERE codigo = '" + destino.getCodigo() + "' ";
     comandoSQL += "AND codigo_viagem = '" + codigoViagem.getValor() + "'";
 }
 
@@ -311,9 +347,9 @@ ComandoExcluirAtividade::ComandoExcluirAtividade(const Codigo &codigoViagem, con
 
 ComandoEditarAtividade::ComandoEditarAtividade(const Codigo &codigoViagem, const Codigo &codigoDestino, const Atividade &atividade) {
     comandoSQL = "UPDATE atividades ";
-    comandoSQL += "SET nome = '" + atividade.getNome().getValor() + "', ";
-    comandoSQL += "custo = '" + std::to_string(atividade.getCusto()) + "' ";
-    comandoSQL += "WHERE codigo = '" + atividade.getCodigo().getValor() + "' ";
+    comandoSQL += "SET nome = '" + atividade.getNome() + "', ";
+    comandoSQL += "preco = '" + std::to_string(atividade.getPreco()) + "' ";
+    comandoSQL += "WHERE codigo = '" + atividade.getCodigo() + "' ";
     comandoSQL += "AND codigo_destino = '" + codigoDestino.getValor() + "' ";
     comandoSQL += "AND codigo_viagem = '" + codigoViagem.getValor() + "'";
 }
@@ -355,50 +391,44 @@ bool ComandoConsultarAtividade::getResultado(Atividade *atividade) {
 //--------------------------------------------------------------------------------------------
 // Classe ComandoAdicionarHospedagem
 
-ComandoAdicionarHospedagem::ComandoAdicionarHospedagem(const Codigo &codigoViagem, const Codigo &codigoDestino, const Hospedagem &hospedagem) {
-    comandoSQL = "INSERT INTO hospedagens (codigo, nome, custo, codigo_destino, codigo_viagem) VALUES (";
-    comandoSQL += "'" + hospedagem.getCodigo().getValor() + "', ";
-    comandoSQL += "'" + hospedagem.getNome().getValor() + "', ";
-    comandoSQL += "'" + std::to_string(hospedagem.getCusto()) + "', ";
+ComandoAdicionarHospedagem::ComandoAdicionarHospedagem(const Codigo &codigoDestino, const Hospedagem &hospedagem) {
+    comandoSQL = "INSERT INTO hospedagens (codigo, nome, diaria, codigo_destino, codigo_viagem) VALUES (";
+    comandoSQL += "'" + hospedagem.getCodigo() + "', ";
+    comandoSQL += "'" + hospedagem.getNome() + "', ";
+    comandoSQL += "'" + std::to_string(hospedagem.getDiaria()) + "', ";
     comandoSQL += "'" + codigoDestino.getValor() + "', ";
-    comandoSQL += "'" + codigoViagem.getValor() + "')";
 }
 
 //--------------------------------------------------------------------------------------------
 // Classe ComandoExcluirHospedagem
 
-ComandoExcluirHospedagem::ComandoExcluirHospedagem(const Codigo &codigoViagem, const Codigo &codigoDestino, const Codigo &codigoHospedagem) {
+ComandoExcluirHospedagem::ComandoExcluirHospedagem(const Codigo &codigoDestino, const Codigo &codigoHospedagem) {
     comandoSQL = "DELETE FROM hospedagens WHERE codigo = '";
     comandoSQL += codigoHospedagem.getValor();
     comandoSQL += "' AND codigo_destino = '";
     comandoSQL += codigoDestino.getValor();
-    comandoSQL += "' AND codigo_viagem = '";
-    comandoSQL += codigoViagem.getValor();
     comandoSQL += "'";
 }
+
 
 //--------------------------------------------------------------------------------------------
 // Classe ComandoEditarHospedagem
 
-ComandoEditarHospedagem::ComandoEditarHospedagem(const Codigo &codigoViagem, const Codigo &codigoDestino, const Hospedagem &hospedagem) {
+ComandoEditarHospedagem::ComandoEditarHospedagem(const Codigo &codigoDestino, const Hospedagem &hospedagem) {
     comandoSQL = "UPDATE hospedagens ";
-    comandoSQL += "SET nome = '" + hospedagem.getNome().getValor() + "', ";
-    comandoSQL += "custo = '" + std::to_string(hospedagem.getCusto()) + "' ";
-    comandoSQL += "WHERE codigo = '" + hospedagem.getCodigo().getValor() + "' ";
-    comandoSQL += "AND codigo_destino = '" + codigoDestino.getValor() + "' ";
-    comandoSQL += "AND codigo_viagem = '" + codigoViagem.getValor() + "'";
+    comandoSQL += "SET nome = '" + hospedagem.getNome() + "', ";
+    comandoSQL += "preco = '" + std::to_string(hospedagem.getDiaria()) + "', ";
+    comandoSQL += "avaliacao = '" + std::to_string(hospedagem.getAvaliacao()) + "' ";
+    comandoSQL += "WHERE codigo = '" + hospedagem.getCodigo() + "' ";
+    comandoSQL += "AND codigo_destino = '" + codigoDestino.getValor() + "'";
 }
 
 //--------------------------------------------------------------------------------------------
 // Classe ComandoConsultarHospedagem
 
-ComandoConsultarHospedagem::ComandoConsultarHospedagem(const Codigo &codigoViagem, const Codigo &codigoDestino, const Codigo &codigoHospedagem) {
+ComandoConsultarHospedagem::ComandoConsultarHospedagem(const Codigo &codigoHospedagem, const Codigo &codigoDestino) {
     comandoSQL = "SELECT * FROM hospedagens WHERE codigo = '";
     comandoSQL += codigoHospedagem.getValor();
-    comandoSQL += "' AND codigo_destino = '";
-    comandoSQL += codigoDestino.getValor();
-    comandoSQL += "' AND codigo_viagem = '";
-    comandoSQL += codigoViagem.getValor();
     comandoSQL += "'";
 }
 
@@ -407,9 +437,214 @@ bool ComandoConsultarHospedagem::getResultado(Hospedagem *hospedagem) {
     if (listaResultado.empty())
         return false;
 
-    // Supondo que a ordem das colunas seja: codigo, nome, custo
+    // Supondo que a ordem das colunas seja: codigo, nome, preco, avaliacao, codigo_destino
     resultado = listaResultado.back();
     listaResultado.pop_back();
-    hospedagem->setCodigo(Codigo(resultado.getValorColuna()));
+    hospedagem->setCodigo(std::string(resultado.getValorColuna()));
 
-    resultado 
+    resultado = listaResultado.back();
+    listaResultado.pop_back();
+    hospedagem->setNome(std::string(resultado.getValorColuna()));
+
+    resultado = listaResultado.back();
+    listaResultado.pop_back();
+    hospedagem->setDiaria(std::stod(resultado.getValorColuna()));
+
+    resultado = listaResultado.back();
+    listaResultado.pop_back();
+    hospedagem->setAvaliacao(std::stoi(resultado.getValorColuna()));
+
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------
+// Classe ComandoListarHospedagens
+
+ComandoConsultarHospedagem::ComandoConsultarHospedagem(const Codigo &codigoDestino, const Codigo &codigoHospedagem) {
+    comandoSQL = "SELECT * FROM hospedagens WHERE codigo_destino = '";
+    comandoSQL += codigoDestino.getValor();
+    comandoSQL += "' AND codigo = '";
+    comandoSQL += codigoHospedagem.getValor();
+    comandoSQL += "'";
+}
+
+bool ComandoConsultarHospedagem::getResultado(Hospedagem *hospedagem) {
+    bool hospedagens;
+    ElementoResultado resultado;
+    if (listaResultado.empty())
+        return false;
+    while (!listaResultado.empty()) {
+        Hospedagem hospedagem;
+
+        resultado = listaResultado.back();
+        listaResultado.pop_back();
+        hospedagem.setCodigo(std::string(resultado.getValorColuna()));
+
+        resultado = listaResultado.back();
+        listaResultado.pop_back();
+        hospedagem.setNome(std::string(resultado.getValorColuna()));
+
+        resultado = listaResultado.back();
+        listaResultado.pop_back();
+        hospedagem.setDiaria(std::stod(resultado.getValorColuna()));
+
+        resultado = listaResultado.back();
+        listaResultado.pop_back();
+        hospedagem.setAvaliacao(std::stoi(resultado.getValorColuna()));
+    }
+
+    return hospedagens;
+}
+
+//--------------------------------------------------------------------------------------------
+
+
+bool checarUsuarioCadastrado(Codigo codigo){
+    // Todo serviço que precisa de usuário cadastrado precisa chegar primeiro se o usuário está cadastrado.
+    // Isso evita usuário descadastrado continuando a executar serviços.
+
+    ComandoContarEntidade comandoContarUsuario("usuarios", "codigo", codigo.getValor());
+    comandoContarUsuario.executar();
+
+    if (comandoContarUsuario.getResultado() == 0)
+        return false;
+
+    return true;
+}
+
+bool CntrServicoAutenticacao::autenticar(const Codigo &codigo, const Senha &senha){
+
+    ComandoLerSenha comandoLerSenha(codigo);
+
+    try {
+        comandoLerSenha.executar();
+
+        string senhaRecuperada;
+
+        senhaRecuperada = comandoLerSenha.getResultado();
+
+        if (senhaRecuperada == senha.getValor())
+            return true;
+
+        return false;
+    }
+    catch(EErroPersistencia &exp) {
+        return false;
+    }
+}
+bool CntrServicoPessoal::cadastrarUsuario(Usuario usuario){
+
+    ComandoCadastrarUsuario comandoCadastrar(usuario);
+
+    try{
+        comandoCadastrar.executar();
+        return true;
+    }
+    catch(EErroPersistencia &exp) {
+        return false;
+    }
+}
+
+Codigo CntrServicoViagens::gerarCodigo(){
+
+    int digitoChar;
+    string digitoAleatorio;
+    string stringCodigoAleatorio = "";
+    Codigo codigoAleatorio;
+
+    for (int i = 0; i < 5; i++)
+    {
+        digitoChar = rand() % 2;
+
+        if (digitoChar)
+            digitoAleatorio = 'A' + rand()%26;
+        else
+            digitoAleatorio = to_string(rand() % 10);
+
+        stringCodigoAleatorio += digitoAleatorio;
+    }
+
+    codigoAleatorio.setValor(stringCodigoAleatorio);
+
+    return codigoAleatorio;
+}
+
+Codigo CntrServicoViagens::gerarCodigoValido(string entidade){
+
+    Codigo codigoAleatorio;
+    bool codigoValidoEncontrado = false;
+
+    while (!codigoValidoEncontrado){
+        codigoAleatorio = gerarCodigo();
+
+        if (codigoValido(entidade, codigoAleatorio))
+            codigoValidoEncontrado = true;
+    }
+
+    return codigoAleatorio;
+}
+int CntrServicoViagens::compararDatas(Data dataUm, Data dataDois)
+{
+    // Checar se a dataDois é maior ou igual à dataUm.
+
+    char delim = '-';
+	int posicaoPrimeiroDelim = 2;
+	int posicaoSegundoDelim = 5;
+
+	int diaUm, mesUm, anoUm;
+	int diaDois, mesDois, anoDois;
+
+    diaUm = stoi(dataUm.getValor().substr(0, 2));
+	mesUm = stoi(dataUm.getValor().substr(posicaoPrimeiroDelim + 1, 2));
+	anoUm = stoi(dataUm.getValor().substr(posicaoSegundoDelim + 1, 2));
+
+    diaDois = stoi(dataDois.getValor().substr(0, 2));
+	mesDois = stoi(dataDois.getValor().substr(posicaoPrimeiroDelim + 1, 2));
+	anoDois = stoi(dataDois.getValor().substr(posicaoSegundoDelim + 1, 2));
+
+    switch (compararUnidadesData(anoUm, anoDois)){
+        case 3:
+            return 3;
+        case 1:
+            return 1;
+        case 2:
+            switch (compararUnidadesData(mesUm, mesDois)){
+                case 3:
+                    return 3;
+                case 1:
+                    return 1;
+                case 2:
+                    return compararUnidadesData(diaUm, diaDois);
+            }
+    }
+}
+
+bool CntrServicoViagens::checarIntervaloDatas(Data primeiroDataUm, Data primeiroDataDois, Data segundoDataUm, Data segundoDataDois)
+{
+    // Considerando o primeiro como a data à qual a segunda precisa se ajustar.
+    // Assim, segundoDataUm precisa ser maior ou igual a primeiroDataUm.
+    // E segundoDataDois precisa ser menor ou igual a primeiroDataDois.
+
+    if (compararDatas(primeiroDataUm, segundoDataUm) == 1)
+        return false;
+
+    if (compararDatas(primeiroDataDois, segundoDataDois) == 3)
+        return false;
+
+    return true;
+}
+
+double CntrServicoViagens::dinheiroParaDouble(Dinheiro dinheiro)
+{
+    string valor;
+    valor = dinheiro.getValor();
+
+	while (valor.find(".") != string::npos)
+		valor.replace(valor.find("."), 1, "");
+
+	while (valor.find(",") != string::npos)
+		valor.replace(valor.find(","), 1, ".");
+
+    // Conversăo do valor em formato certo para double.
+	return stod(valor);
+}
