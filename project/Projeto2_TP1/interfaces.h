@@ -100,6 +100,15 @@ public:
 /// Atividades e Hospedagens.
 class IServicoViagem {
 public:
+
+    // ---------------------------
+    // Operações geral 
+    // ---------------------------
+    virtual Codigo gerarCodigo() = 0;
+    virtual Codigo gerarCodigoValido(std::string entidade) = 0;
+    virtual bool checarIntervaloDatas(Data primeiroDataUm, Data primeiroDataDois, Data segundoDataUm, Data segundoDataDois) = 0;
+    virtual double dinheiroParaDouble(Dinheiro dinheiro) = 0;
+    virtual bool codigoValido(std::string entidade, Codigo codigo) = 0;
     // ---------------------------
     // Operações sobre Viagem
     // ---------------------------
@@ -130,6 +139,8 @@ public:
     virtual bool adicionarHospedagem(const Codigo &codigoViagem, const Codigo &codigoDestino, const Hospedagem &hospedagem) = 0;
     virtual bool excluirHospedagem(const Codigo &codigoViagem, const Codigo &codigoDestino, const Codigo &codigoHospedagem) = 0;
     virtual bool editarHospedagem(const Codigo &codigoViagem, const Codigo &codigoDestino, const Hospedagem &hospedagem) = 0;
+
+
 
     virtual ~IServicoViagem() {}
 };

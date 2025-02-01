@@ -79,7 +79,21 @@ public:
 // Você pode criar quantas forem necessárias: cada comando encapsula 1 operação SQL distinta.
 //--------------------------------------------------------------------------------------------
 
-// (1) Conta / Autenticação
+// (1) Geral
+class ComandoGerarCodigo : public ComandoSQL {
+public:
+    // Gera um código único para ser usado em contas, viagens, etc.
+    ComandoGerarCodigo();
+    Codigo getResultado();
+};
+
+class ComandoGerarCodigoValido : public ComandoSQL {
+public:
+    // Gera um código único para ser usado em contas, viagens, etc.
+    ComandoGerarCodigoValido();
+    Codigo getResultado();
+};
+// (2) Conta / Autenticação
 class ComandoCadastrarConta : public ComandoSQL {
 public:
     // Recebe objeto Conta e gera comando SQL de INSERT no banco.
@@ -113,6 +127,7 @@ public:
     ComandoLerSenha(const Codigo &codigoConta);
     std::string getResultado();
 };
+
 
 // (2) Viagem
 class ComandoCriarViagem : public ComandoSQL {
@@ -174,6 +189,7 @@ public:
 };
 
 
+
 // (4) Atividade
 class ComandoAdicionarAtividade : public ComandoSQL {
 public:
@@ -222,16 +238,30 @@ public:
 };
 
 
-//--------------------------------------------------------------------------------------------
-// Exemplo de função auxiliar que você pode querer ter para verificar se uma Conta existe, etc.
 bool checarContaCadastrada(const Codigo &codigoConta);
 
 
+//Classe ComandoContarEntidade.
 
+class ComandoContarEntidade:public ComandoSQL {
+public:
+        ComandoContarEntidade(string, string, string);
+        int getResultado();
+};
+
+//---------------------------------------------------------------------------
+//Classe ComandoContarEntidadeDuplo.
+
+class ComandoContarEntidadeDuplo:public ComandoSQL {
+public:
+        ComandoContarEntidadeDuplo(string, string, string, string, string, string);
+        int getResultado();
+};
 //--------------------------------------------------------------------------------------------
 // Classes controladoras da camada de serviço propriamente ditas, que implementam as interfaces.
 // Elas usam os comandos acima para acessar o banco de dados via ComandoSQL.
 //--------------------------------------------------------------------------------------------
+
 
 class CntrServicoAutenticacao : public IServicoAutenticacao {
 public:
@@ -271,11 +301,20 @@ public:
     bool excluirHospedagem(const Codigo &codigoViagem, const Codigo &codigoDestino, const Codigo &codigoHospedagem) override;
     bool editarHospedagem(const Codigo &codigoViagem, const Codigo &codigoDestino, const Hospedagem &hospedagem) override;
 
-    double consultarCustoViagem(const Codigo &codigoViagem);
+
+private: 
+    Codigo gerarCodigo();
+    bool codigoValido(std::string entidade, Codigo codigo);
+    Codigo gerarCodigoValido(string);
+
+    int compararUnidadesData(int, int);
+    int compararDatas(Data, Data);
+    bool checarIntervaloDatas(Data, Data, Data, Data);
+    
 
     double dinheiroParaDouble(const Dinheiro &dinheiro);
+    double consultarCustoViagem(const Codigo &codigoViagem);
 
-private:        
     std::vector<Destino> listarDestinos(const Codigo &codigoViagem);
     std::vector<Atividade> listarAtividades(const Codigo &codigoViagem, const Codigo &codigoDestino);
     std::vector<Hospedagem> listarHospedagens(const Codigo &codigoViagem, const Codigo &codigoDestino);

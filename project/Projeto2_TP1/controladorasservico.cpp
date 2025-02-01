@@ -532,9 +532,9 @@ bool CntrServicoAutenticacao::autenticar(const Codigo &codigo, const Senha &senh
         return false;
     }
 }
-bool CntrServicoPessoal::cadastrarUsuario(Usuario usuario){
+bool CntrServicoViajante::cadastrarConta(const Conta &conta){
 
-    ComandoCadastrarUsuario comandoCadastrar(usuario);
+    ComandoCadastrarConta comandoCadastrar(conta);
 
     try{
         comandoCadastrar.executar();
@@ -545,7 +545,7 @@ bool CntrServicoPessoal::cadastrarUsuario(Usuario usuario){
     }
 }
 
-Codigo CntrServicoViagens::gerarCodigo(){
+Codigo CntrServicoViagem::gerarCodigo(){
 
     int digitoChar;
     string digitoAleatorio;
@@ -569,7 +569,7 @@ Codigo CntrServicoViagens::gerarCodigo(){
     return codigoAleatorio;
 }
 
-Codigo CntrServicoViagens::gerarCodigoValido(string entidade){
+Codigo CntrServicoViagem::gerarCodigoValido(string entidade){
 
     Codigo codigoAleatorio;
     bool codigoValidoEncontrado = false;
@@ -583,7 +583,26 @@ Codigo CntrServicoViagens::gerarCodigoValido(string entidade){
 
     return codigoAleatorio;
 }
-int CntrServicoViagens::compararDatas(Data dataUm, Data dataDois)
+
+bool CntrServicoViagem::codigoValido(string entidade, Codigo codigo)
+{
+    ComandoContarEntidade comandoContarEntidade(entidade, "codigo", codigo.getValor());
+
+    try {
+        comandoContarEntidade.executar();
+
+        if (comandoContarEntidade.getResultado() == 0)
+            return true;
+
+        return false;
+    }
+    catch(EErroPersistencia &exp) {
+        return false;
+    }
+}
+
+
+int CntrServicoViagem::compararDatas(Data dataUm, Data dataDois)
 {
     // Checar se a dataDois é maior ou igual à dataUm.
 
@@ -591,7 +610,7 @@ int CntrServicoViagens::compararDatas(Data dataUm, Data dataDois)
 	int posicaoPrimeiroDelim = 2;
 	int posicaoSegundoDelim = 5;
 
-	int diaUm, mesUm, anoUm;
+	int diaUm, mesUm, anoUm; 
 	int diaDois, mesDois, anoDois;
 
     diaUm = stoi(dataUm.getValor().substr(0, 2));
@@ -619,7 +638,7 @@ int CntrServicoViagens::compararDatas(Data dataUm, Data dataDois)
     }
 }
 
-bool CntrServicoViagens::checarIntervaloDatas(Data primeiroDataUm, Data primeiroDataDois, Data segundoDataUm, Data segundoDataDois)
+bool CntrServicoViagem::checarIntervaloDatas(Data primeiroDataUm, Data primeiroDataDois, Data segundoDataUm, Data segundoDataDois)
 {
     // Considerando o primeiro como a data à qual a segunda precisa se ajustar.
     // Assim, segundoDataUm precisa ser maior ou igual a primeiroDataUm.
@@ -634,7 +653,7 @@ bool CntrServicoViagens::checarIntervaloDatas(Data primeiroDataUm, Data primeiro
     return true;
 }
 
-double CntrServicoViagens::dinheiroParaDouble(Dinheiro dinheiro)
+double CntrServicoViagem::dinheiroParaDouble(const Dinheiro &dinheiro)
 {
     string valor;
     valor = dinheiro.getValor();
@@ -645,6 +664,72 @@ double CntrServicoViagens::dinheiroParaDouble(Dinheiro dinheiro)
 	while (valor.find(",") != string::npos)
 		valor.replace(valor.find(","), 1, ".");
 
-    // Conversăo do valor em formato certo para double.
+
 	return stod(valor);
 }
+
+
+double CntrServicoViagem::consultarCustoViagem(const Codigo &codigoViagem) {
+    double total = 0.0;
+
+    // Initialize the command to retrieve the trip data
+    ComandoConsultarViagem comandoConsultarViagem(codigoViagem);
+    
+    Viagem viagem;  // Create a Viagem object
+
+    // Retrieve the viagem data
+    if (!comandoConsultarViagem.getResultado(&viagem)) {
+        return 0.0;  // If retrieval fails, return 0
+    }
+
+    // Iterate over the destinations
+    for (const auto& destino : viagem.getDestinos()) {
+        for (const auto& atividade : destino.getAtividades()) {
+            total += atividade.getPreco();
+        }
+        for (const auto& hospedagem : destino.getHospedagens()) {
+            total += hospedagem.getDiaria();
+        }
+    }
+
+    return total;
+}
+
+
+
+bool listarViagensDoViajante(const Viajante& viajante) {
+    cout << "Viagens de " << viajante.getConta().getCodigo() << ":" << endl;
+    for (const auto& viagem : viajante.getViagens()) {
+        cout << "- " << viagem.getNome() << " (" << viagem.getCodigo() << ")" << endl;
+    }
+}
+
+bool listarDestinosDaViagem(const Viagem& viagem) {
+    cout << "Destinos da viagem " << viagem.getNome() << ":" << endl;
+    for (const auto& destino : viagem.getDestinos()) {
+        cout << "- " << destino.getNome() << " (" << destino.getCodigo() << ")" << endl;
+    }
+}
+
+bool listarAtividadesDoDestino(const Destino& destino) {
+    cout << "Atividades no destino " << destino.getNome() << ":" << endl;
+    for (const auto& atividade : destino.getAtividades()) {
+        cout << "- " << atividade.getNome() << " (R$ " << atividade.getPreco() << ")" << endl;
+    }
+}
+
+bool listarHospedagensDoDestino(const Destino& destino) {
+    cout << "Hospedagens no destino " << destino.getNome() << ":" << endl;
+    for (const auto& hospedagem : destino.getHospedagens()) {
+        cout << "- " << hospedagem.getNome() << " (Diária: R$ " << hospedagem.getDiaria() << ")" << endl;
+    }
+}
+bool podeExcluirViagem(const Viagem& viagem) {
+    return viagem.getDestinos().empty();  // Só pode excluir se não houver destinos associados
+}
+
+bool podeExcluirDestino(const Destino& destino) {
+    return destino.getAtividades().empty() && destino.getHospedagens().empty();  // Só pode excluir se não houver atividades nem hospedagens associadas
+}
+
+
