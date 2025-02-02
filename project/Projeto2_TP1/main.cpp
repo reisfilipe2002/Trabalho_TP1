@@ -1,7 +1,4 @@
-#include <string.h>
-#include <stdexcept>
 #include <iostream>
-
 #include "curses.h"
 #include "dominios.h"
 #include "interfaces.h"
@@ -12,46 +9,33 @@ using namespace std;
 
 int main()
 {
+    // Criando uma conta fictícia
+ // Supondo que exista um construtor padrão
 
-    // Instancia as controladoras de apresentaçăo.
+    // Instanciando os controladores de apresentação e passando a conta
+    CntrApresentacaoControle *cntrApresentacaoControle = new CntrApresentacaoControle();
+    IApresentacaoAutenticacao *cntrApresentacaoAutenticacao = new CntrApresentacaoAutenticacao();
+    IApresentacaoViagem *cntrApresentacaoViagem = new CntrApresentacaoViagem();
+    IApresentacaoViajante *cntrApresentacaoViajante = new CntrApresentacaoViajante();
 
-    CntrApresentacaoControle *cntrApresentacaoControle;
-    IApresentacaoAutenticacao *cntrApresentacaoAutenticacao;
-    IApresentacaoPessoal *cntrApresentacaoPessoal;
-    IApresentacaoImoveis *cntrApresentacaoImoveis;
+    // Instanciando os controladores de serviço
+    IServicoAutenticacao *cntrServicoAutenticacao = new CntrServicoAutenticacao();
+    IServicoViajante *cntrServicoViajante = new CntrServicoViajante();
+    IServicoViagem *cntrServicoViagem = new CntrServicoViagem();
 
-    cntrApresentacaoControle = new CntrApresentacaoControle();
-    cntrApresentacaoAutenticacao = new CntrApresentacaoAutenticacao();
-    cntrApresentacaoPessoal = new CntrApresentacaoPessoal();
-    cntrApresentacaoImoveis = new CntrApresentacaoImoveis();
-
-    // Instancia as controladoras de serviço.
-
-    IServicoAutenticacao *cntrServicoAutenticacao;
-    IServicoPessoal *cntrServicoPessoal;
-    IServicoImoveis *cntrServicoImoveis;
-
-    cntrServicoAutenticacao = new CntrServicoAutenticacao();
-    cntrServicoPessoal = new CntrServicoPessoal();
-    cntrServicoImoveis = new CntrServicoImoveis();
-
-    // Interliga as controladoras de apresentação às de serviço.
-
+    // Ligando controladores de apresentação aos controladores de serviço
     cntrApresentacaoControle->setCntrApresentacaoAutenticacao(cntrApresentacaoAutenticacao);
-    cntrApresentacaoControle->setCntrApresentacaoPessoal(cntrApresentacaoPessoal);
-    cntrApresentacaoControle->setCntrApresentacaoImoveis(cntrApresentacaoImoveis);
+    cntrApresentacaoControle->setCntrIApresentacaoViajante(cntrApresentacaoViajante);
+    cntrApresentacaoControle->setCntrIApresentacaoViagem(cntrApresentacaoViagem);
 
     cntrApresentacaoAutenticacao->setCntrServicoAutenticacao(cntrServicoAutenticacao);
+    cntrApresentacaoViajante->setCntrServicoViajante(cntrServicoViajante);
+    cntrApresentacaoViajante->setCntrServicoViagem(cntrServicoViagem);
 
-    cntrApresentacaoPessoal->setCntrServicoPessoal(cntrServicoPessoal);
-    cntrApresentacaoPessoal->setCntrServicoImoveis(cntrServicoImoveis);
-
-    cntrApresentacaoImoveis->setCntrServicoImoveis(cntrServicoImoveis);
-
-    initscr();                                                                      // Inicia curses.
-    cntrApresentacaoControle->executar();                                           // Solicita serviço apresentacao.
-    endwin();                                                                       // Finaliza curses.
+    // Iniciando interface curses
+    initscr();         
+    cntrApresentacaoControle->executar();
+    endwin();          
 
     return 0;
 }
-

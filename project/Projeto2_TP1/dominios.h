@@ -16,12 +16,15 @@ using namespace std;
 ///
 class Codigo {
 private:
+    std::string valor;
     static const int TAMANHO = 6;
     string valor;
     void validar(string);
 
 public:
-    Codigo();
+    Codigo() = default;
+
+    Codigo(const std::string &codigo);
     string getValor() const;
     void setValor(const string);
 };
@@ -43,6 +46,7 @@ inline string Codigo::getValor() const {
 ///
 class Data {
 private:
+    std::string valor;
     string valor;
     void validar(string);
 
@@ -138,7 +142,8 @@ private:
     void validar(string);
 
 public:
-    Nome();
+    Nome() = default;
+    Nome(const string &nome);
     string getValor() const;
     void setValor(const string);
 };
@@ -189,7 +194,7 @@ private:
     void validar(string);
 
 public:
-    Senha();
+    Senha(const std::string &senha);
     string getValor() const;
     void setValor(const string);
 };

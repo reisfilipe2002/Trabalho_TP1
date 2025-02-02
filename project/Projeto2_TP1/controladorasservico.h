@@ -312,7 +312,7 @@ private:
     bool checarIntervaloDatas(Data, Data, Data, Data);
     
 
-    double dinheiroParaDouble(const Dinheiro &dinheiro);
+    double dinheiroParaDouble(Dinheiro);
     double consultarCustoViagem(const Codigo &codigoViagem);
 
     std::vector<Destino> listarDestinos(const Codigo &codigoViagem);

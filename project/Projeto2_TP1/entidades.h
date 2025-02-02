@@ -39,12 +39,20 @@ private:
     Senha senha;
 
 public:
-    void setCodigo(const std::string& val);
-    void setSenha(const std::string& val);
+    Conta() = default;  // Construtor padrão explícito
 
-    std::string getCodigo() const;
-    std::string getSenha() const;
+    Conta(const std::string& cod, const std::string& sen) : codigo(cod), senha(sen) {
+        setCodigo(cod);
+        setSenha(sen);
+    }
+
+    void setCodigo(const std::string& val) { codigo.setValor(val); }
+    void setSenha(const std::string& val) { senha.setValor(val); }
+
+    std::string getCodigo() const { return codigo.getValor(); }
+    std::string getSenha() const { return senha.getValor(); }
 };
+
 
 class Destino {
 private:
@@ -85,6 +93,12 @@ private:
     std::vector<Destino> destinos;
 
 public:
+    Viagem() = default;  // Construtor padrão explícito
+    Viagem(const std::string& cod, const std::string& nom, int ava) : codigo(cod), nome(nom) {
+        setCodigo(cod);
+        setNome(nom);
+        setAvaliacao(ava);
+    }
     void setCodigo(const std::string& val);
     void setNome(const std::string& val);
     void setAvaliacao(int val);
@@ -105,6 +119,13 @@ private:
     Avaliacao avaliacao;
 
 public:
+    Hospedagem() = default;  // Construtor padrão explícito
+    Hospedagem(const std::string& cod, const std::string& nom, double dia, int ava) : codigo(cod), nome(nom) {
+        setCodigo(cod);
+        setNome(nom);
+        setDiaria(dia);
+        setAvaliacao(ava);
+    }
     void setCodigo(const std::string& val);
     void setNome(const std::string& val);
     void setDiaria(double val);
@@ -122,6 +143,7 @@ private:
     std::vector<Viagem> viagens;
 
 public:
+
     void setConta(const Conta& conta);
 
 
